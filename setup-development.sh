@@ -16,8 +16,6 @@ podman --log-level error create \
   --userns keep-id \
   --user root:root \
   --shm-size=1g \
-  --workdir "/var/home/truls" \
-  --volume "/var/home/truls/git:/var/home/truls/git:rslave" \
   --volume "/run/user/1000/wayland-0:/run/user/1000/wayland-0" \
   registry.fedoraproject.org/fedora-toolbox:44 \
   sleep infinity
@@ -26,8 +24,9 @@ echo ">>> Starting container"
 podman start development
 
 echo ">>> Setting up the 'truls' user"
-podman exec --user root development usermod --shell /bin/bash "truls"
-podman exec --user root development chown "truls:truls" "/var/home/truls"
+podman exec --user root development mkdir -p /var/home/truls
+podman exec --user root development usermod --shell /bin/bash --home /var/home/truls truls
+podman exec --user root development chown truls:truls /var/home/truls
 podman exec --user root development bash -c \
   "echo 'truls ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/truls && chmod 0440 /etc/sudoers.d/truls"
 
